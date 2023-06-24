@@ -8,9 +8,11 @@ That wrapper was tailored for my needs (token management, massive concurrency, e
 Main features
 -------------
 
+- Build with high concurrency in mind (thread safe, coroutine safe)
+- Optional async support
 - Reusable Oauth2 token (api v2)
 - Automatic Oauth2 token refresh (api v2)
-- Configurable rate limit
+- Built-in rate limiting
 - Built-in thread support
 - Response validation (pydantic)
 
