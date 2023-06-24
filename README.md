@@ -1,9 +1,14 @@
 circleapi
 ---------
 
-Yet another python wrapper for osu! api
+Yet another python wrapper for the osu! api
 
-That wrapper was tailored for my needs (token management, massive concurrency, easy logging), unless you know what you're doing I would highly suggest using another wrapper ([aiosu](https://github.com/NiceAesth/aiosu), [ossapi](https://github.com/circleguard/ossapi))
+Take a look at the "examples" folder for typical use cases.
+
+Disclaimer
+----------
+
+The wrapper was tailored for my needs (token management, massive concurrency, easy logging), unless you know what you're doing I would highly suggest using another wrapper ([aiosu](https://github.com/NiceAesth/aiosu), [ossapi](https://github.com/circleguard/ossapi))
 
 Main features
 -------------
