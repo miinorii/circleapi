@@ -12,6 +12,7 @@ Main features
 - Automatic Oauth2 token refresh (api v2)
 - Configurable rate limit
 - Built-in thread support
+- Response validation (pydantic)
 
 Installation
 ------------
