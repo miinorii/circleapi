@@ -65,10 +65,10 @@ class GuestToken:
         self.payload = extract_payload_from_token(self.access_token)
 
     def export_to_file(self, filename: str, enable_auto_update: bool = False):
-        with open(filename, "w") as f:
-            f.write(f"{self.access_token}")
         if enable_auto_update:
             self._file = filename
+        with open(filename, "w") as f:
+            f.write(f"{self.access_token}")
 
     def check_token(self, force_refresh=False):
         """
@@ -84,6 +84,8 @@ class GuestToken:
                     or force_refresh:
                 logger.info(f"Refreshing guest token ... | {force_refresh=} {time.time()}:{self.payload.exp - 3600 if self.payload else 0}")
                 self._request_token()
+                if self._file:
+                    self.export_to_file(self._file)
                 logger.info("Guest token refreshed")
                 return False
             return True
