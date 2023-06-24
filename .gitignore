@@ -1,5 +1,6 @@
 tests/.env
 tests/user_token
+venv/
 circleapi.egg-info/
 circleapi/__pycache__/
 tests/__pycache__/
