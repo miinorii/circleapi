@@ -4,7 +4,7 @@ from circleapi import (
     AsyncApiV2, Beatmap, AsyncUserToken,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
     Beatmaps, BeatmapAttributes, setup_queue_logging,
-    Score
+    Score, AsyncExternalApi
 )
 from dotenv import dotenv_values
 
@@ -61,3 +61,23 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
     async def test_get_score(self):
         data = await self.api.get_score("osu", 1720541511)
         self.assertIsInstance(data, Score)
+
+
+class TestExternalApiLive(unittest.IsolatedAsyncioTestCase):
+    async def test_get_ranked_ids(self):
+        ranked = await AsyncExternalApi.get_ranked_ids()
+        self.assertIn(53, ranked)
+
+    async def test_get_loved_ids(self):
+        loved = await AsyncExternalApi.get_loved_ids()
+        self.assertIn(24722, loved)
+
+    async def test_get_ranked_and_loved_ids(self):
+        ranked_and_loved = await AsyncExternalApi.get_ranked_and_loved_ids()
+        self.assertIn(53, ranked_and_loved)
+        self.assertIn(24722, ranked_and_loved)
+
+
+if __name__ == "__main__":
+    unittest.main()
+

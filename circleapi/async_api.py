@@ -274,3 +274,30 @@ class AsyncApiV2:
         }
 
         return await self._request(**kwargs)
+
+
+class AsyncExternalApi:
+    @staticmethod
+    async def get_ranked_ids() -> list[int]:
+        async with httpx.AsyncClient() as client:
+            r = await client.get("https://osu.lea.moe/beatmaps")
+        l = r.json()["ranked"]["beatmaps"]
+        l.sort()
+        return l
+
+    @staticmethod
+    async def get_loved_ids() -> list[int]:
+        async with httpx.AsyncClient() as client:
+            r = await client.get("https://osu.lea.moe/beatmaps")
+        l = r.json()["loved"]["beatmaps"]
+        l.sort()
+        return l
+
+    @staticmethod
+    async def get_ranked_and_loved_ids() -> list[int]:
+        async with httpx.AsyncClient() as client:
+            r = await client.get("https://osu.lea.moe/beatmaps")
+        data = r.json()
+        l = list(set(data["ranked"]["beatmaps"]) | set(data["loved"]["beatmaps"]))
+        l.sort()
+        return l
