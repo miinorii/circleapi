@@ -28,6 +28,8 @@ class GuestToken:
                 logger.warning("Loading token from file failed: file does not exist")
 
     def has_scope(self, scope: ApiScope, raise_exception: bool = False) -> bool:
+        if not self.payload:
+            self.check_token()
         in_payload = scope in self.payload.scopes
         if raise_exception and not in_payload:
             raise InvalidApiScope(scope)
@@ -121,6 +123,8 @@ class UserToken:
                 logger.warning("Loading token from file failed: file does not exist")
 
     def has_scope(self, scope: ApiScope, raise_exception: bool = False) -> bool:
+        if not self.payload:
+            self.check_token()
         in_payload = scope in self.payload.scopes
         if raise_exception and not in_payload:
             raise InvalidApiScope(scope)
