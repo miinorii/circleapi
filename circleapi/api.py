@@ -80,6 +80,7 @@ class ApiV2:
     def __init__(self, token: GuestToken | UserToken):
         self.timeout = httpx.Timeout(20, read=240)
         self.token = token
+        self.token.check_token()
         self.rate_limit = RateLimit(1000)
         self._global_client = False
         self._lock = threading.Lock()
