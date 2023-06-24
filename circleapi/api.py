@@ -96,7 +96,7 @@ class ApiV2:
             return self._create_client()
         with self._lock:
             if self._client.is_closed:
-                self._client = self._create_client()
+                self.start_client()
                 logger.warning("ApiV2 pool renewed")
         return self._client
 
