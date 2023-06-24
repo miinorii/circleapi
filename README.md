@@ -1,22 +1,20 @@
-# circleapi
-
----
+circleapi
+---------
 
 Yet another python wrapper for osu! api
 
 That wrapper was tailored for my needs (token management, massive concurrency, easy logging), unless you know what you're doing I would highly suggest using another wrapper ([aiosu](https://github.com/NiceAesth/aiosu), [ossapi](https://github.com/circleguard/ossapi))
-### Main features
 
----
+Main features
+-------------
 
 - Reusable Oauth2 token (api v2)
 - Automatic Oauth2 token refresh (api v2)
 - Configurable rate limit
 - Built-in thread support
 
-### Installation
-
----
+Installation
+------------
 
 Development setup
 ```bash
@@ -28,9 +26,8 @@ $ pip install -r requirements.txt
 $ pip install -e .
 ```
 
-### Endpoints
-
----
+Endpoints
+---------
 
 - osu api v2
   - beatmap_lookup
