@@ -29,7 +29,8 @@ Development setup
 $ git clone https://github.com/miinorii/circleapi.git
 $ cd circleapi
 $ python -m venv venv
-$ venv/bin/activate
+$ venv/bin/activate # linux
+$ venv/Scripts/activate.bat # windows
 $ pip install -r requirements.txt
 $ pip install -e .
 ```
