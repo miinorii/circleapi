@@ -1,6 +1,6 @@
 from __future__ import annotations
-from pydantic import BaseModel
-from enum import Enum
+from pydantic import BaseModel, Field
+from enum import IntEnum
 from typing import Literal
 from datetime import datetime
 
@@ -16,7 +16,7 @@ Rank = Literal["F", "D", "C", "B", "A", "S", "X", "SH", "XH"]
 ScoreScope = Literal["global", "country"]
 RankStatus = Literal["graveyard", "wip", "pending", "ranked", "approved", "qualified", "loved"]
 
-class RankStatusInt(Enum):
+class RankStatusInt(IntEnum):
     # https://osu.ppy.sh/docs/index.html#beatmapsetcompact-rank-status
     graveyard = -2
     wip = -1
@@ -27,7 +27,7 @@ class RankStatusInt(Enum):
     loved = 4
 
 
-class GameModeInt(Enum):
+class GameModeInt(IntEnum):
     OSU = 0
     TAIKO = 1
     FRUITS = 2
@@ -36,24 +36,18 @@ class GameModeInt(Enum):
 
 class Covers(BaseModel):
     cover: str
-    cover_2x: str
+    cover_2x: str = Field(alias="cover@2x")
     card: str
-    card_2x: str
+    card_2x: str = Field(alias="card@2x")
     list: str
-    list_2x: str
+    list_2x: str = Field(alias="list@2x")
     slimcover: str
-    slimcover_2x: str
-
-    class Config:
-        fields = {"cover_2x": "cover@2x",
-                  "card_2x": "card@2x",
-                  "list_2x": "list@2x",
-                  "slimcover_2x": "slimcover@2x"}
+    slimcover_2x: str = Field(alias="slimcover@2x")
 
 
 class Availability(BaseModel):
     download_disabled: bool
-    more_information: str | None
+    more_information: str | None = None
 
 
 class Nominations(BaseModel):
@@ -67,8 +61,8 @@ class Hype(BaseModel):
 
 
 class Failtimes(BaseModel):
-    exit: list[int] | None
-    fail: list[int] | None
+    exit: list[int] | None = None
+    fail: list[int] | None = None
 
 
 class BeatmapCompact(BaseModel):
@@ -84,10 +78,10 @@ class BeatmapCompact(BaseModel):
     version: str
 
     # Optional
-    beatmapset: Beatmapset | BeatmapsetCompact | None
-    max_combo: int | None
-    checksum: str | None
-    failtimes: Failtimes | None
+    beatmapset: Beatmapset | BeatmapsetCompact | None = None
+    max_combo: int | None = None
+    checksum: str | None = None
+    failtimes: Failtimes | None = None
 
 
 class Beatmap(BeatmapCompact):
@@ -111,8 +105,8 @@ class Beatmap(BeatmapCompact):
     url: str
 
     # Optional
-    deleted_at: datetime | None
-    bpm: float | None
+    deleted_at: datetime | None = None
+    bpm: float | None = None
 
 
 class Beatmaps(BaseModel):
@@ -140,18 +134,18 @@ class BeatmapsetCompact(BaseModel):
     video: bool
 
     # Optional
-    beatmaps: list[Beatmap] | None
+    beatmaps: list[Beatmap] | None = None
     #converts: None  # TODO
     #current_user_attributes: None  # TODO
     #description: None  # TODO
     #discussions: None  # TODO
     #events: None  # TODO
     #genre: None  # TODO
-    has_favourited: bool | None
+    has_favourited: bool | None = None
     #language: None  # TODO
-    nominations: Nominations | None
-    pack_tags: list[str] | None
-    ratings: list[int] | None
+    nominations: Nominations | None = None
+    pack_tags: list[str] | None = None
+    ratings: list[int] | None = None
     #recent_favourites: None  # TODO
     #related_users: None  # TODO
     #user: None  # TODO
@@ -166,16 +160,16 @@ class Beatmapset(BeatmapsetCompact):
     discussion_locked: bool
     is_scoreable: bool
     last_updated: datetime
-    nominations: Nominations
+    nominations: Nominations | None = None
     ranked: RankStatusInt
     storyboard: bool
     tags: str
 
     # Optional
-    hype: Hype | None
-    legacy_thread_url: str | None
-    submitted_date: datetime | None
-    ranked_date: datetime | None
+    hype: Hype | None = None
+    legacy_thread_url: str | None = None
+    submitted_date: datetime | None = None
+    ranked_date: datetime | None = None
 
 
 class StatisticsOsu(BaseModel):
@@ -193,9 +187,9 @@ class Country(BaseModel):
 
 
 class Cover(BaseModel):
-    custom_url: str | None
+    custom_url: str | None = None
     url: str
-    id: int | None
+    id: int | None = None
 
 
 class UserCompact(BaseModel):
@@ -213,11 +207,11 @@ class UserCompact(BaseModel):
     username: str
 
     # Optional
-    default_group: str | None
-    last_visit: datetime | None
-    profile_colour: str | None
-    country: Country | None
-    cover: Cover | None
+    default_group: str | None = None
+    last_visit: datetime | None = None
+    profile_colour: str | None = None
+    country: Country | None = None
+    cover: Cover | None = None
 
 
 class Score(BaseModel):
@@ -240,10 +234,10 @@ class Score(BaseModel):
     replay: bool
 
     # Optional
-    pp: float | None
-    user: UserCompact | None
-    beatmap: Beatmap | None
-    rank_global: int | None
+    pp: float | None = None
+    user: UserCompact | None = None
+    beatmap: Beatmap | None = None
+    rank_global: int | None = None
 
 
 class BeatmapUserScore(BaseModel):
@@ -259,7 +253,7 @@ class BeatmapUserScores(BaseModel):
 class BeatmapScores(BaseModel):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     scores: list[Score]
-    user_score: BeatmapUserScore | None
+    user_score: BeatmapUserScore | None = None
 
 
 class BeatmapDifficultyAttributes(BaseModel):
@@ -270,26 +264,26 @@ class BeatmapDifficultyAttributes(BaseModel):
 
     # Optional
     # osu
-    aim_difficulty: float | None
-    approach_rate: float | None
-    flashlight_difficulty: float | None
-    overall_difficulty: float | None
-    slider_factor: float | None
-    speed_difficulty: float | None
+    aim_difficulty: float | None = None
+    approach_rate: float | None = None
+    flashlight_difficulty: float | None = None
+    overall_difficulty: float | None = None
+    slider_factor: float | None = None
+    speed_difficulty: float | None = None
 
     # taiko
-    stamina_difficulty: float | None
-    rhythm_difficulty: float | None
-    colour_difficulty: float | None
-    approach_rate: float | None
-    great_hit_window: float | None
+    stamina_difficulty: float | None = None
+    rhythm_difficulty: float | None = None
+    colour_difficulty: float | None = None
+    approach_rate: float | None = None
+    great_hit_window: float | None = None
 
     # fruits
-    approach_rate: float | None
+    approach_rate: float | None = None
 
     # mania
-    great_hit_window: float | None
-    score_multiplier: float | None
+    great_hit_window: float | None = None
+    score_multiplier: float | None = None
 
 
 class BeatmapAttributes(BaseModel):
@@ -302,10 +296,10 @@ class TokenPayload(BaseModel):
     iat: float
     nbf: float
     exp: float
-    sub: int | None
+    sub: int | None = None
     scopes: list[ApiScope]
 
 
 # pydantic forward refs
-Beatmap.update_forward_refs()
+Beatmap.model_rebuild()
 

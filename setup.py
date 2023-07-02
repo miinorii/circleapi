@@ -7,7 +7,7 @@ setup(
     packages=["circleapi"],
     install_requires=[
         "httpx[http2]==0.24.1",
-        "pydantic==1.10.9",
+        "pydantic==2.0",
         "python-dotenv==1.0.0"
     ]
 )
