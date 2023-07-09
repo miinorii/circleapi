@@ -12,7 +12,7 @@ def setup_queue_logging(to_console=False, to_file: str | None = None) -> QueueLi
     log_queue = queue.Queue(-1)
     queue_handler = QueueHandler(log_queue)
 
-    formatter = logging.Formatter("%(asctime)s [%(name)s][%(levelname)s] %(message)s")
+    formatter = logging.Formatter("%(asctime)s [%(name)s][%(threadName)s][%(levelname)s] %(message)s")
     log = logging.getLogger("circleapi")
     log.setLevel(logging.DEBUG)
     log.addHandler(queue_handler)
