@@ -5,7 +5,7 @@ from circleapi import (
     UserToken, ApiV2, Beatmap,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
     Beatmaps, BeatmapAttributes, setup_queue_logging,
-    Score, ExternalApi
+    Score, ExternalApi, Beatmapset
 )
 from dotenv import dotenv_values
 
@@ -37,6 +37,7 @@ class TestApiV2Live(unittest.TestCase):
     def test_beatmap_lookup(self):
         data = self.api.beatmap_lookup(beatmap_id=53)
         self.assertIsInstance(data, Beatmap)
+        self.assertIsInstance(data.beatmapset, Beatmapset)
 
     def test_get_user_beatmap_score(self):
         data = self.api.get_user_beatmap_score(22423, 2, "osu")

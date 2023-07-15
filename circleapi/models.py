@@ -78,7 +78,7 @@ class BeatmapCompact(BaseModel):
     version: str
 
     # Optional
-    beatmapset: Beatmapset | BeatmapsetCompact | None = None
+    beatmapset: BeatmapsetCompact | None = None
     max_combo: int | None = None
     checksum: str | None = None
     failtimes: Failtimes | None = None
@@ -105,6 +105,7 @@ class Beatmap(BeatmapCompact):
     url: str
 
     # Optional
+    beatmapset: Beatmapset | None = None
     deleted_at: datetime | None = None
     bpm: float | None = None
 
@@ -134,6 +135,7 @@ class BeatmapsetCompact(BaseModel):
     video: bool
 
     # Optional
+    offset: int | None
     beatmaps: list[Beatmap] | None = None
     #converts: None  # TODO
     #current_user_attributes: None  # TODO
