@@ -3,7 +3,7 @@ from .models import (
     BeatmapScores, GameMode, ScoreScope,
     Beatmap, Mod, BeatmapUserScore,
     BeatmapUserScores, Beatmaps, BeatmapAttributes,
-    Score
+    Score, User
 )
 from .async_token import AsyncUserToken, AsyncGuestToken
 import time
@@ -271,6 +271,20 @@ class AsyncApiV2:
             "url": f"/scores/{mode}/{score_id}",
             "validate_with": Score,
             "args": {"mode": mode, "score_id": score_id}
+        }
+
+        return await self._request(**kwargs)
+
+    async def get_own_data(self,
+                     mode: GameMode | None = None) -> User:
+        # https://osu.ppy.sh/docs/index.html#get-own-data
+        await self.token.has_scope("identify", raise_exception=True)
+
+        kwargs = {
+            "method": "GET",
+            "url": f"/me/{mode if mode else ''}",
+            "validate_with": User,
+            "args": {"mode": mode}
         }
 
         return await self._request(**kwargs)

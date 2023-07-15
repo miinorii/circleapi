@@ -15,6 +15,9 @@ Mod = Literal["HD", "DT", "HR", "FL", "NF", "NC", "SD", "SO", "PF", "EZ", "HT", 
 Rank = Literal["F", "D", "C", "B", "A", "S", "X", "SH", "XH"]
 ScoreScope = Literal["global", "country"]
 RankStatus = Literal["graveyard", "wip", "pending", "ranked", "approved", "qualified", "loved"]
+PlayStyle = Literal["mouse", "keyboard", "tablet", "touch"]
+ProfilePage = Literal["me", "recent_activity", "beatmaps", "historical", "kudosu", "top_ranks", "medals"]
+
 
 class RankStatusInt(IntEnum):
     # https://osu.ppy.sh/docs/index.html#beatmapsetcompact-rank-status
@@ -194,6 +197,111 @@ class Cover(BaseModel):
     id: int | None = None
 
 
+class UserAccountHistory(BaseModel):
+    # https://osu.ppy.sh/docs/index.html#usercompact-useraccounthistory
+    id: int
+    length: int
+    permanent: bool
+    timestamp: datetime
+    type: Literal["note", "restriction", "silence"]
+    description: str | None = None
+
+
+class ProfileBanner(BaseModel):
+    id: int
+    tournament_id: int
+    image: str
+
+
+class UserBadge(BaseModel):
+    awarded_at: datetime
+    description: str
+    image_url: str
+    url: str
+
+class UserGroup(BaseModel):
+    has_listing: bool
+    has_playmodes: bool
+    id: int
+    identifier: str
+    is_probationary: bool
+    name: str
+    short_name: str
+    colour: str | None = None
+    playmodes: list[GameMode] | None = None
+
+
+class UserMonthlyPlaycount(BaseModel):
+    count: int
+    start_date: str
+
+
+class UserPage(BaseModel):
+    html: str
+    raw: str
+
+
+class RankHighest(BaseModel):
+    rank: int
+    updated_at: datetime
+
+
+class RankHistory(BaseModel):
+    mode: GameMode
+    data: list[int]
+
+
+class UserLevel(BaseModel):
+    current: int
+    progress: int
+
+
+class UserGradeCounts(BaseModel):
+    a: int
+    s: int
+    sh: int
+    ss: int
+    ssh: int
+
+
+class UserStatistics(BaseModel):
+    count_300: int
+    count_100: int
+    count_50: int
+    count_miss: int
+    level: UserLevel
+    pp: float
+    ranked_score: int
+    hit_accuracy: float
+    play_count: int
+    play_time: int
+    total_score: int
+    total_hits: int
+    maximum_combo: int
+    replays_watched_by_others: int
+    is_ranked: bool
+    grade_counts: UserGradeCounts
+    global_rank: int | None = None
+    country_rank: int | None = None
+
+
+class UserStatisticsRulesets(BaseModel):
+    osu: UserStatistics
+    taiko: UserStatistics
+    fruits: UserStatistics
+    mania: UserStatistics
+
+
+class UserAchievement(BaseModel):
+    achieved_at: datetime
+    achievement_id: int
+
+
+class UserReplayWatchcount(BaseModel):
+    start_date: str
+    count: int
+
+
 class UserCompact(BaseModel):
     # https://osu.ppy.sh/docs/index.html#usercompact
     # Required
@@ -214,6 +322,60 @@ class UserCompact(BaseModel):
     profile_colour: str | None = None
     country: Country | None = None
     cover: Cover | None = None
+    account_history: list[UserAccountHistory] | None = None
+    active_tournament_banner: ProfileBanner | None = None
+    badges: list[UserBadge] | None = None
+    beatmap_playcounts_count: int | None = None
+    favourite_beatmapset_count: int | None = None
+    follower_count: int | None = None
+    graveyard_beatmapset_count: int | None = None
+    groups: list[UserGroup] | None = None
+    guest_beatmapset_count: int | None = None
+    is_restricted: bool | None = None
+    loved_beatmapset_count: int | None = None
+    mapping_follower_count: int | None = None
+    monthly_playcounts: list[UserMonthlyPlaycount] | None = None
+    page: UserPage | None = None
+    pending_beatmapset_count: int | None = None
+    previous_usernames: list[str] | None = None
+    rank_highest: RankHighest | None = None
+    rank_history: RankHistory | None = None
+    ranked_beatmapset_count: int | None = None
+    replays_watched_counts: list[UserReplayWatchcount] | None = None
+    scores_best_count: int | None = None
+    scores_first_count: int | None = None
+    scores_recent_count: int | None = None
+    statistics: UserStatistics | None = None
+    statistics_rulesets: UserStatisticsRulesets | None = None
+    support_level: int | None = None
+    unread_pm_count: int | None = None
+    user_achievements: list[UserAchievement] | None = None
+
+
+class UserKudosu(BaseModel):
+    available: int
+    total: int
+
+
+class User(UserCompact):
+    has_supported: bool
+    join_date: datetime
+    kudosu: UserKudosu
+    max_blocks: int
+    max_friends: int
+    playmode: GameMode
+    playstyle: list[PlayStyle]
+    post_count: int
+    profile_order: list[ProfilePage]
+    discord: str | None = None
+    interests: str | None = None
+    location: str | None = None
+    occupation: str | None = None
+    title: str | None = None
+    title_url: str | None = None
+    twitter: str | None = None
+    website: str | None = None
+
 
 
 class Score(BaseModel):

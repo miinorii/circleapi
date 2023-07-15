@@ -47,6 +47,7 @@ Endpoints
   - get_beatmap
   - get_beatmap_attributes
   - get_score
+  - get_own_data
 - osu.lea.moe
   - get_ranked_ids
   - get_loved_ids

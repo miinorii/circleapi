@@ -4,7 +4,7 @@ from circleapi import (
     AsyncApiV2, Beatmap, AsyncUserToken,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
     Beatmaps, BeatmapAttributes, setup_queue_logging,
-    Score, AsyncExternalApi, Beatmapset
+    Score, AsyncExternalApi, Beatmapset, User
 )
 from dotenv import dotenv_values
 
@@ -28,6 +28,10 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.log.stop()
+
+    async def test_get_own_data(self):
+        data = await self.api.get_own_data()
+        self.assertIsInstance(data, User)
 
     async def test_beatmap_lookup(self):
         data = await self.api.beatmap_lookup(beatmap_id=53)

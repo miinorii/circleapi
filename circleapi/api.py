@@ -3,7 +3,7 @@ from .models import (
     BeatmapScores, GameMode, ScoreScope,
     Beatmap, Mod, BeatmapUserScore,
     BeatmapUserScores, Beatmaps, BeatmapAttributes,
-    Score
+    Score, User
 )
 from .token import GuestToken, UserToken
 import time
@@ -337,6 +337,23 @@ class ApiV2:
         else:
             return self._request(**kwargs)
 
+    def get_own_data(self,
+                     mode: GameMode | None = None,
+                     as_thread: bool = False) -> User | RequestThread:
+        # https://osu.ppy.sh/docs/index.html#get-own-data
+        self.token.has_scope("identify", raise_exception=True)
+
+        kwargs = {
+            "method": "GET",
+            "url": f"/me/{mode if mode else ''}",
+            "validate_with": User,
+            "args": {"mode": mode}
+        }
+
+        if as_thread:
+            return RequestThread(target=self._request, kwargs=kwargs)
+        else:
+            return self._request(**kwargs)
 
 class ExternalApi:
     @staticmethod
