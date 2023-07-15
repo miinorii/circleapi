@@ -252,10 +252,18 @@ class BeatmapUserScores(BaseModel):
     scores: list[Score]
 
 
+class GetBeatmapScoresArgs(BaseModel):
+    beatmap_id: int
+    mode: GameMode | None = None
+    mods: list[Mod] | None = None
+    scope: ScoreScope = "global"
+
+
 class BeatmapScores(BaseModel):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     scores: list[Score]
     user_score: BeatmapUserScore | None = None
+    args: GetBeatmapScoresArgs | None = None
 
 
 class BeatmapDifficultyAttributes(BaseModel):

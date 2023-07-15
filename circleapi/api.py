@@ -146,7 +146,7 @@ class ApiV2:
 
         req.raise_for_status()
         logger.info(f"[  \033[32mOK\033[0m  ] {url} {params=} {json_data=}")
-        data = validate_with(**req.json())
+        data = validate_with(**req.json(), args=args)
         return data
 
     def beatmap_lookup(self,
@@ -193,7 +193,7 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}",
             "params": params,
             "validate_with": BeatmapUserScore,
-            "args": {"beatmap": beatmap_id, "user": user_id, **params}
+            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
         }
 
         if as_thread:
@@ -217,7 +217,7 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}/all",
             "params": params,
             "validate_with": BeatmapUserScores,
-            "args": {"beatmap": beatmap_id, "user": user_id, **params}
+            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
         }
 
         if as_thread:
@@ -229,7 +229,7 @@ class ApiV2:
                            beatmap_id: int,
                            mode: GameMode | None = None,
                            mods: list[Mod] | None = None,
-                           scope: ScoreScope | None = None,
+                           scope: ScoreScope = "global",
                            as_thread: bool = False) -> BeatmapScores | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-scores
         self.token.has_scope("public", raise_exception=True)
@@ -244,7 +244,7 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores",
             "params": params,
             "validate_with": BeatmapScores,
-            "args": {"beatmap": beatmap_id, **params}
+            "args": {"beatmap_id": beatmap_id, **params}
         }
 
         if as_thread:
@@ -283,7 +283,7 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}",
             "params": {},
             "validate_with": Beatmap,
-            "args": {"beatmap": beatmap_id}
+            "args": {"beatmap_id": beatmap_id}
         }
 
         if as_thread:
@@ -310,7 +310,7 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/attributes",
             "json_data": params,
             "validate_with": BeatmapAttributes,
-            "args": {"beatmap": beatmap_id, **params}
+            "args": {"beatmap_id": beatmap_id, **params}
         }
 
         if as_thread:
@@ -329,7 +329,7 @@ class ApiV2:
             "method": "GET",
             "url": f"/scores/{mode}/{score_id}",
             "validate_with": Score,
-            "args": {"mode": mode, "score": score_id}
+            "args": {"mode": mode, "score_id": score_id}
         }
 
         if as_thread:

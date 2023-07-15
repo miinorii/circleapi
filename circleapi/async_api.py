@@ -116,7 +116,7 @@ class AsyncApiV2:
 
         req.raise_for_status()
         logger.info(f"[  \033[32mOK\033[0m  ] {url} {params=} {json_data=}")
-        data = validate_with(**req.json())
+        data = validate_with(**req.json(), args=args)
         return data
 
     async def beatmap_lookup(self,
@@ -158,7 +158,7 @@ class AsyncApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}",
             "params": params,
             "validate_with": BeatmapUserScore,
-            "args": {"beatmap": beatmap_id, "user": user_id, **params}
+            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
         }
 
         return await self._request(**kwargs)
@@ -178,7 +178,7 @@ class AsyncApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}/all",
             "params": params,
             "validate_with": BeatmapUserScores,
-            "args": {"beatmap": beatmap_id, "user": user_id, **params}
+            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
         }
 
         return await self._request(**kwargs)
@@ -201,7 +201,7 @@ class AsyncApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores",
             "params": params,
             "validate_with": BeatmapScores,
-            "args": {"beatmap": beatmap_id, **params}
+            "args": {"beatmap_id": beatmap_id, **params}
         }
 
         return await self._request(**kwargs)
@@ -232,7 +232,7 @@ class AsyncApiV2:
             "url": f"/beatmaps/{beatmap_id}",
             "params": {},
             "validate_with": Beatmap,
-            "args": {"beatmap": beatmap_id}
+            "args": {"beatmap_id": beatmap_id}
         }
 
         return await self._request(**kwargs)
@@ -255,7 +255,7 @@ class AsyncApiV2:
             "url": f"/beatmaps/{beatmap_id}/attributes",
             "json_data": params,
             "validate_with": BeatmapAttributes,
-            "args": {"beatmap": beatmap_id, **params}
+            "args": {"beatmap_id": beatmap_id, **params}
         }
 
         return await self._request(**kwargs)
@@ -270,7 +270,7 @@ class AsyncApiV2:
             "method": "GET",
             "url": f"/scores/{mode}/{score_id}",
             "validate_with": Score,
-            "args": {"mode": mode, "score": score_id}
+            "args": {"mode": mode, "score_id": score_id}
         }
 
         return await self._request(**kwargs)
