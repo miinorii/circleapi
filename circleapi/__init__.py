@@ -6,5 +6,5 @@ from .async_api import AsyncApiV2, AsyncRateLimit, AsyncExternalApi
 from .models import (
     Beatmap, BeatmapUserScore, BeatmapUserScores,
     BeatmapScores, Beatmaps, BeatmapAttributes,
-    Score, Beatmapset, UserCompact
+    Score, Beatmapset, UserCompact, ScoreScope, GameMode
 )
