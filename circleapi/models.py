@@ -418,7 +418,7 @@ class GetBeatmapScoresArgs(BaseModel):
     beatmap_id: int
     mode: GameMode | None = None
     mods: list[Mod] | None = None
-    scope: ScoreScope = "global"
+    type: ScoreScope = "global"
 
 
 class BeatmapScores(BaseModel):

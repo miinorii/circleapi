@@ -50,7 +50,11 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
         data = await self.api.get_beatmap_scores(53, mode="osu", scope="global")
         self.assertIsInstance(data, BeatmapScores)
         self.assertEqual(53, data.args.beatmap_id)
-        self.assertEqual("global", data.args.scope)
+        self.assertEqual("global", data.args.type)
+        data = await self.api.get_beatmap_scores(53, mode="osu", scope="country")
+        self.assertIsInstance(data, BeatmapScores)
+        self.assertEqual(53, data.args.beatmap_id)
+        self.assertEqual("country", data.args.type)
 
     async def test_get_beatmaps(self):
         data = await self.api.get_beatmaps([53, 55])
