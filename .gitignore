@@ -4,3 +4,5 @@ venv/
 circleapi.egg-info/
 circleapi/__pycache__/
 tests/__pycache__/
+build/
+dist/
