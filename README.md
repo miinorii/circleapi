@@ -24,6 +24,10 @@ Main features
 Installation
 ------------
 
+```bash
+$ pip install circleapi
+```
+
 Development setup
 ```bash
 $ git clone https://github.com/miinorii/circleapi.git
