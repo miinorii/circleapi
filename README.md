@@ -1,14 +1,14 @@
 circleapi
 ---------
 
-Yet another python wrapper for the osu! api
+Yet another python wrapper for osu! api
 
 Take a look at the "examples" folder for typical use cases.
 
 Disclaimer
 ----------
 
-The wrapper was tailored for my needs (token management, massive concurrency, easy logging), unless you know what you're doing I would highly suggest using another wrapper ([aiosu](https://github.com/NiceAesth/aiosu), [ossapi](https://github.com/circleguard/ossapi))
+circleapi was made with my needs in mind (token management, massive concurrency, easy logging, async support), unless you know what you're doing I would highly recommend using another wrapper ([aiosu](https://github.com/NiceAesth/aiosu), [ossapi](https://github.com/circleguard/ossapi))
 
 Main features
 -------------
@@ -19,7 +19,7 @@ Main features
 - Automatic Oauth2 token refresh (api v2)
 - Built-in rate limiting
 - Built-in thread support
-- Response validation (pydantic)
+- Strict response validation (pydantic)
 
 Installation
 ------------
@@ -39,7 +39,7 @@ $ pip install -r requirements.txt
 $ pip install -e .
 ```
 
-Endpoints
+Supported endpoints
 ---------
 
 - osu api v2
