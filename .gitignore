@@ -6,3 +6,4 @@ circleapi/__pycache__/
 tests/__pycache__/
 build/
 dist/
+.idea/
