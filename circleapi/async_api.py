@@ -10,9 +10,15 @@ import time
 import httpx
 import random
 import asyncio
+import msgspec
 
 
 class AsyncRateLimit:
+    max_req_per_sec: float
+    bucket_limit: float
+    bucket: float
+    last_req_ts: int
+
     def __init__(self, req_per_minute):
         self._lock = asyncio.Lock()
         self.set_rate_limit(req_per_minute)
@@ -116,7 +122,10 @@ class AsyncApiV2:
 
         req.raise_for_status()
         logger.info(f"[  \033[32mOK\033[0m  ] {url} {params=} {json_data=}")
-        data = validate_with(**req.json(), args=args)
+        data = msgspec.json.decode(req.content, type=validate_with, strict=False)
+
+        if hasattr(validate_with, "args"):
+            data.args = args
         return data
 
     async def beatmap_lookup(self,

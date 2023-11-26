@@ -1,8 +1,8 @@
 from __future__ import annotations
-from pydantic import BaseModel, Field
 from enum import IntEnum
 from typing import Literal
 from datetime import datetime
+import msgspec
 
 
 # https://osu.ppy.sh/docs/index.html#scopes
@@ -17,6 +17,16 @@ ScoreScope = Literal["global", "country"]
 RankStatus = Literal["graveyard", "wip", "pending", "ranked", "approved", "qualified", "loved"]
 PlayStyle = Literal["mouse", "keyboard", "tablet", "touch"]
 ProfilePage = Literal["me", "recent_activity", "beatmaps", "historical", "kudosu", "top_ranks", "medals"]
+
+
+def sanitize_name(name: str) -> str:
+    # If a renamed name exist return it, else return the original name
+    return {
+        "cover_2x": "cover@2x",
+        "card_2x": "card@2x",
+        "list_2x": "list@2x",
+        "slimcover_2x": "slimcover@2x"
+    }.get(name, name)
 
 
 class RankStatusInt(IntEnum):
@@ -37,38 +47,38 @@ class GameModeInt(IntEnum):
     MANIA = 3
 
 
-class Covers(BaseModel):
+class Covers(msgspec.Struct, rename=sanitize_name):
     cover: str
-    cover_2x: str = Field(alias="cover@2x")
+    cover_2x: str
     card: str
-    card_2x: str = Field(alias="card@2x")
+    card_2x: str
     list: str
-    list_2x: str = Field(alias="list@2x")
+    list_2x: str
     slimcover: str
-    slimcover_2x: str = Field(alias="slimcover@2x")
+    slimcover_2x: str
 
 
-class Availability(BaseModel):
+class Availability(msgspec.Struct):
     download_disabled: bool
     more_information: str | None = None
 
 
-class Nominations(BaseModel):
+class Nominations(msgspec.Struct):
     current: int
     required: int
 
 
-class Hype(BaseModel):
+class Hype(msgspec.Struct):
     current: int
     required: int
 
 
-class Failtimes(BaseModel):
+class Failtimes(msgspec.Struct):
     exit: list[int] | None = None
     fail: list[int] | None = None
 
 
-class BeatmapCompact(BaseModel):
+class BeatmapCompact(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#beatmapcompact
     # Required
     beatmapset_id: int
@@ -87,7 +97,7 @@ class BeatmapCompact(BaseModel):
     failtimes: Failtimes | None = None
 
 
-class Beatmap(BeatmapCompact):
+class Beatmap(BeatmapCompact, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmap
     # Required
     accuracy: float
@@ -113,12 +123,12 @@ class Beatmap(BeatmapCompact):
     bpm: float | None = None
 
 
-class Beatmaps(BaseModel):
+class Beatmaps(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#get-beatmaps
     beatmaps: list[Beatmap]
 
 
-class BeatmapsetCompact(BaseModel):
+class BeatmapsetCompact(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#beatmapsetcompact
     # Required
     artist: str
@@ -156,7 +166,7 @@ class BeatmapsetCompact(BaseModel):
     #user: None  # TODO
 
 
-class Beatmapset(BeatmapsetCompact):
+class Beatmapset(BeatmapsetCompact, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     # Required
     availability: Availability
@@ -177,7 +187,7 @@ class Beatmapset(BeatmapsetCompact):
     ranked_date: datetime | None = None
 
 
-class StatisticsOsu(BaseModel):
+class StatisticsOsu(msgspec.Struct):
     count_50: int
     count_100: int
     count_300: int
@@ -186,18 +196,18 @@ class StatisticsOsu(BaseModel):
     count_miss: int
 
 
-class Country(BaseModel):
+class Country(msgspec.Struct):
     code: str
     name: str
 
 
-class Cover(BaseModel):
-    custom_url: str | None = None
+class Cover(msgspec.Struct):
     url: str
+    custom_url: str | None = None
     id: int | None = None
 
 
-class UserAccountHistory(BaseModel):
+class UserAccountHistory(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#usercompact-useraccounthistory
     id: int
     length: int
@@ -207,19 +217,20 @@ class UserAccountHistory(BaseModel):
     description: str | None = None
 
 
-class ProfileBanner(BaseModel):
+class ProfileBanner(msgspec.Struct):
     id: int
     tournament_id: int
     image: str
 
 
-class UserBadge(BaseModel):
+class UserBadge(msgspec.Struct):
     awarded_at: datetime
     description: str
     image_url: str
     url: str
 
-class UserGroup(BaseModel):
+
+class UserGroup(msgspec.Struct):
     has_listing: bool
     has_playmodes: bool
     id: int
@@ -231,32 +242,32 @@ class UserGroup(BaseModel):
     playmodes: list[GameMode] | None = None
 
 
-class UserMonthlyPlaycount(BaseModel):
+class UserMonthlyPlaycount(msgspec.Struct):
     count: int
     start_date: str
 
 
-class UserPage(BaseModel):
+class UserPage(msgspec.Struct):
     html: str
     raw: str
 
 
-class RankHighest(BaseModel):
+class RankHighest(msgspec.Struct):
     rank: int
     updated_at: datetime
 
 
-class RankHistory(BaseModel):
+class RankHistory(msgspec.Struct):
     mode: GameMode
     data: list[int]
 
 
-class UserLevel(BaseModel):
+class UserLevel(msgspec.Struct):
     current: int
     progress: int
 
 
-class UserGradeCounts(BaseModel):
+class UserGradeCounts(msgspec.Struct):
     a: int
     s: int
     sh: int
@@ -264,7 +275,7 @@ class UserGradeCounts(BaseModel):
     ssh: int
 
 
-class UserStatistics(BaseModel):
+class UserStatistics(msgspec.Struct):
     count_300: int
     count_100: int
     count_50: int
@@ -285,24 +296,24 @@ class UserStatistics(BaseModel):
     country_rank: int | None = None
 
 
-class UserStatisticsRulesets(BaseModel):
+class UserStatisticsRulesets(msgspec.Struct):
     osu: UserStatistics
     taiko: UserStatistics
     fruits: UserStatistics
     mania: UserStatistics
 
 
-class UserAchievement(BaseModel):
+class UserAchievement(msgspec.Struct):
     achieved_at: datetime
     achievement_id: int
 
 
-class UserReplayWatchcount(BaseModel):
+class UserReplayWatchcount(msgspec.Struct):
     start_date: str
     count: int
 
 
-class UserCompact(BaseModel):
+class UserCompact(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#usercompact
     # Required
     avatar_url: str
@@ -352,12 +363,12 @@ class UserCompact(BaseModel):
     user_achievements: list[UserAchievement] | None = None
 
 
-class UserKudosu(BaseModel):
+class UserKudosu(msgspec.Struct):
     available: int
     total: int
 
 
-class User(UserCompact):
+class User(UserCompact, kw_only=True):
     has_supported: bool
     join_date: datetime
     kudosu: UserKudosu
@@ -377,8 +388,7 @@ class User(UserCompact):
     website: str | None = None
 
 
-
-class Score(BaseModel):
+class Score(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#score
     # Required
     id: int
@@ -404,31 +414,24 @@ class Score(BaseModel):
     rank_global: int | None = None
 
 
-class BeatmapUserScore(BaseModel):
+class BeatmapUserScore(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#beatmapuserscore
     position: int
     score: Score
 
 
-class BeatmapUserScores(BaseModel):
+class BeatmapUserScores(msgspec.Struct):
     scores: list[Score]
 
 
-class GetBeatmapScoresArgs(BaseModel):
-    beatmap_id: int
-    mode: GameMode | None = None
-    mods: list[Mod] | None = None
-    type: ScoreScope = "global"
-
-
-class BeatmapScores(BaseModel):
+class BeatmapScores(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     scores: list[Score]
     user_score: BeatmapUserScore | None = None
-    args: GetBeatmapScoresArgs | None = None
+    args: dict | None = None
 
 
-class BeatmapDifficultyAttributes(BaseModel):
+class BeatmapDifficultyAttributes(msgspec.Struct):
     # https://osu.ppy.sh/docs/index.html#beatmapdifficultyattributes
     # Required
     max_combo: int
@@ -447,31 +450,23 @@ class BeatmapDifficultyAttributes(BaseModel):
     stamina_difficulty: float | None = None
     rhythm_difficulty: float | None = None
     colour_difficulty: float | None = None
-    approach_rate: float | None = None
     great_hit_window: float | None = None
 
     # fruits
-    approach_rate: float | None = None
 
     # mania
-    great_hit_window: float | None = None
     score_multiplier: float | None = None
 
 
-class BeatmapAttributes(BaseModel):
+class BeatmapAttributes(msgspec.Struct):
     attributes: BeatmapDifficultyAttributes
 
 
-class TokenPayload(BaseModel):
+class TokenPayload(msgspec.Struct):
     aud: int
     jti: str
     iat: float
     nbf: float
     exp: float
-    sub: int | None = None
     scopes: list[ApiScope]
-
-
-# pydantic forward refs
-Beatmap.model_rebuild()
-
+    sub: int | None = None

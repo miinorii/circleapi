@@ -6,11 +6,12 @@ from .models import (
     Score, User
 )
 from .token import GuestToken, UserToken
+from copy import deepcopy
+import msgspec
 import time
 import threading
 import httpx
 import random
-from copy import deepcopy
 
 
 class RequestThread(threading.Thread):
@@ -42,6 +43,11 @@ class RequestThread(threading.Thread):
 
 
 class RateLimit:
+    max_req_per_sec: float
+    bucket_limit: float
+    bucket: float
+    last_req_ts: int
+
     def __init__(self, req_per_minute):
         self._lock = threading.Lock()
         self.set_rate_limit(req_per_minute)
@@ -51,7 +57,6 @@ class RateLimit:
         self.bucket_limit = 1 if self.max_req_per_sec < 1 else self.max_req_per_sec
         self.bucket = self.bucket_limit
         self.last_req_ts = int(time.time())
-
 
     def is_exceeded(self):
         """
@@ -146,7 +151,10 @@ class ApiV2:
 
         req.raise_for_status()
         logger.info(f"[  \033[32mOK\033[0m  ] {url} {params=} {json_data=}")
-        data = validate_with(**req.json(), args=args)
+        data = msgspec.json.decode(req.content, type=validate_with, strict=False)
+
+        if hasattr(validate_with, "args"):
+            data.args = args
         return data
 
     def beatmap_lookup(self,
@@ -158,9 +166,12 @@ class ApiV2:
         self.token.has_scope("public", raise_exception=True)
 
         params = {}
-        if checksum: params["checksum"] = checksum
-        if filename: params["filename"] = filename
-        if beatmap_id: params["id"] = beatmap_id
+        if checksum:
+            params["checksum"] = checksum
+        if filename:
+            params["filename"] = filename
+        if beatmap_id:
+            params["id"] = beatmap_id
 
         kwargs = {
             "method": "GET",
