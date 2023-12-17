@@ -1,10 +1,10 @@
 import unittest
 import os
 from circleapi import (
-    AsyncApiV2, Beatmap, AsyncUserToken,
+    AsyncApiV2, BeatmapExtended, AsyncUserToken,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
     Beatmaps, BeatmapAttributes, setup_queue_logging,
-    Score, AsyncExternalApi, Beatmapset, User
+    Score, AsyncExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
 
@@ -31,12 +31,12 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_own_data(self):
         data = await self.api.get_own_data()
-        self.assertIsInstance(data, User)
+        self.assertIsInstance(data, UserExtended)
 
     async def test_beatmap_lookup(self):
         data = await self.api.beatmap_lookup(beatmap_id=53)
-        self.assertIsInstance(data, Beatmap)
-        self.assertIsInstance(data.beatmapset, Beatmapset)
+        self.assertIsInstance(data, BeatmapExtended)
+        self.assertIsInstance(data.beatmapset, BeatmapsetExtended)
 
     async def test_get_user_beatmap_score(self):
         data = await self.api.get_user_beatmap_score(22423, 2, "osu")
@@ -63,7 +63,7 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_beatmap(self):
         data = await self.api.get_beatmap(53)
-        self.assertIsInstance(data, Beatmap)
+        self.assertIsInstance(data, BeatmapExtended)
 
     async def test_get_beatmap_attributes(self):
         data = await self.api.get_beatmap_attributes(53)

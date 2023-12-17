@@ -2,10 +2,10 @@ import unittest
 import os
 import warnings
 from circleapi import (
-    UserToken, ApiV2, Beatmap,
+    UserToken, ApiV2, BeatmapExtended,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
     Beatmaps, BeatmapAttributes, setup_queue_logging,
-    Score, ExternalApi, Beatmapset, User
+    Score, ExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
 
@@ -36,12 +36,12 @@ class TestApiV2Live(unittest.TestCase):
 
     def test_get_own_data(self):
         data = self.api.get_own_data()
-        self.assertIsInstance(data, User)
+        self.assertIsInstance(data, UserExtended)
 
     def test_beatmap_lookup(self):
         data = self.api.beatmap_lookup(beatmap_id=53)
-        self.assertIsInstance(data, Beatmap)
-        self.assertIsInstance(data.beatmapset, Beatmapset)
+        self.assertIsInstance(data, BeatmapExtended)
+        self.assertIsInstance(data.beatmapset, BeatmapsetExtended)
 
     def test_get_user_beatmap_score(self):
         data = self.api.get_user_beatmap_score(22423, 2, "osu")
@@ -68,7 +68,7 @@ class TestApiV2Live(unittest.TestCase):
 
     def test_get_beatmap(self):
         data = self.api.get_beatmap(53)
-        self.assertIsInstance(data, Beatmap)
+        self.assertIsInstance(data, BeatmapExtended)
 
     def test_get_beatmap_attributes(self):
         data = self.api.get_beatmap_attributes(53)

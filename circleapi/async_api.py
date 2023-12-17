@@ -1,9 +1,9 @@
 from .logger import logger
 from .models import (
-    BeatmapScores, GameMode, ScoreScope,
-    Beatmap, Mod, BeatmapUserScore,
+    BeatmapScores, Ruleset, ScoreScope,
+    BeatmapExtended, Mod, BeatmapUserScore,
     BeatmapUserScores, Beatmaps, BeatmapAttributes,
-    Score, User
+    Score, UserExtended
 )
 from .async_token import AsyncUserToken, AsyncGuestToken
 import time
@@ -131,7 +131,7 @@ class AsyncApiV2:
     async def beatmap_lookup(self,
                        checksum: str | None = None,
                        filename: str | None = None,
-                       beatmap_id: int | None = None) -> Beatmap:
+                       beatmap_id: int | None = None) -> BeatmapExtended:
         # https://osu.ppy.sh/docs/index.html#lookup-beatmap
         await self.token.has_scope("public", raise_exception=True)
 
@@ -144,17 +144,17 @@ class AsyncApiV2:
             "method": "GET",
             "url": f"/beatmaps/lookup",
             "params": params,
-            "validate_with": Beatmap,
+            "validate_with": BeatmapExtended,
             "args": params
         }
 
         return await self._request(**kwargs)
 
     async def get_user_beatmap_score(self,
-                               beatmap_id: int,
-                               user_id: int,
-                               mode: GameMode | None = None,
-                               mods: list[Mod] | None = None) -> BeatmapUserScore:
+                                     beatmap_id: int,
+                                     user_id: int,
+                                     mode: Ruleset | None = None,
+                                     mods: list[Mod] | None = None) -> BeatmapUserScore:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-score
         await self.token.has_scope("public", raise_exception=True)
 
@@ -173,9 +173,9 @@ class AsyncApiV2:
         return await self._request(**kwargs)
 
     async def get_user_beatmap_scores(self,
-                               beatmap_id: int,
-                               user_id: int,
-                               mode: GameMode | None = None) -> BeatmapUserScores:
+                                      beatmap_id: int,
+                                      user_id: int,
+                                      mode: Ruleset | None = None) -> BeatmapUserScores:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-scores
         await self.token.has_scope("public", raise_exception=True)
 
@@ -193,10 +193,10 @@ class AsyncApiV2:
         return await self._request(**kwargs)
 
     async def get_beatmap_scores(self,
-                           beatmap_id: int,
-                           mode: GameMode | None = None,
-                           mods: list[Mod] | None = None,
-                           scope: ScoreScope | None = None) -> BeatmapScores:
+                                 beatmap_id: int,
+                                 mode: Ruleset | None = None,
+                                 mods: list[Mod] | None = None,
+                                 scope: ScoreScope | None = None) -> BeatmapScores:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-scores
         await self.token.has_scope("public", raise_exception=True)
 
@@ -232,7 +232,7 @@ class AsyncApiV2:
         return await self._request(**kwargs)
 
     async def get_beatmap(self,
-                     beatmap_id: int) -> Beatmap:
+                     beatmap_id: int) -> BeatmapExtended:
         # https://osu.ppy.sh/docs/index.html#get-beatmap
         await self.token.has_scope("public", raise_exception=True)
 
@@ -240,17 +240,17 @@ class AsyncApiV2:
             "method": "GET",
             "url": f"/beatmaps/{beatmap_id}",
             "params": {},
-            "validate_with": Beatmap,
+            "validate_with": BeatmapExtended,
             "args": {"beatmap_id": beatmap_id}
         }
 
         return await self._request(**kwargs)
 
     async def get_beatmap_attributes(self,
-                               beatmap_id: int,
-                               mods: list[Mod] | None = None,
-                               ruleset: GameMode | None = None,
-                               ruleset_id: int | None = None) -> BeatmapAttributes:
+                                     beatmap_id: int,
+                                     mods: list[Mod] | None = None,
+                                     ruleset: Ruleset | None = None,
+                                     ruleset_id: int | None = None) -> BeatmapAttributes:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-attributes
         await self.token.has_scope("public", raise_exception=True)
 
@@ -270,8 +270,8 @@ class AsyncApiV2:
         return await self._request(**kwargs)
 
     async def get_score(self,
-                  mode: GameMode,
-                  score_id: int) -> Score:
+                        mode: Ruleset,
+                        score_id: int) -> Score:
         # https://osu.ppy.sh/docs/index.html#get-apiv2scoresmodescore
         await self.token.has_scope("public", raise_exception=True)
 
@@ -285,14 +285,14 @@ class AsyncApiV2:
         return await self._request(**kwargs)
 
     async def get_own_data(self,
-                     mode: GameMode | None = None) -> User:
+                           mode: Ruleset | None = None) -> UserExtended:
         # https://osu.ppy.sh/docs/index.html#get-own-data
         await self.token.has_scope("identify", raise_exception=True)
 
         kwargs = {
             "method": "GET",
             "url": f"/me/{mode if mode else ''}",
-            "validate_with": User,
+            "validate_with": UserExtended,
             "args": {"mode": mode}
         }
 

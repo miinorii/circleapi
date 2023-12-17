@@ -1,9 +1,9 @@
 from .logger import logger
 from .models import (
-    BeatmapScores, GameMode, ScoreScope,
-    Beatmap, Mod, BeatmapUserScore,
+    BeatmapScores, Ruleset, ScoreScope,
+    BeatmapExtended, Mod, BeatmapUserScore,
     BeatmapUserScores, Beatmaps, BeatmapAttributes,
-    Score, User
+    Score, UserExtended
 )
 from .token import GuestToken, UserToken
 from copy import deepcopy
@@ -161,7 +161,7 @@ class ApiV2:
                        checksum: str | None = None,
                        filename: str | None = None,
                        beatmap_id: int | None = None,
-                       as_thread: bool = False) -> Beatmap | RequestThread:
+                       as_thread: bool = False) -> BeatmapExtended | RequestThread:
         # https://osu.ppy.sh/docs/index.html#lookup-beatmap
         self.token.has_scope("public", raise_exception=True)
 
@@ -177,7 +177,7 @@ class ApiV2:
             "method": "GET",
             "url": f"/beatmaps/lookup",
             "params": params,
-            "validate_with": Beatmap,
+            "validate_with": BeatmapExtended,
             "args": params
         }
 
@@ -189,7 +189,7 @@ class ApiV2:
     def get_user_beatmap_score(self,
                                beatmap_id: int,
                                user_id: int,
-                               mode: GameMode | None = None,
+                               mode: Ruleset | None = None,
                                mods: list[Mod] | None = None,
                                as_thread: bool = False) -> BeatmapUserScore | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-score
@@ -213,10 +213,10 @@ class ApiV2:
             return self._request(**kwargs)
 
     def get_user_beatmap_scores(self,
-                               beatmap_id: int,
-                               user_id: int,
-                               mode: GameMode | None = None,
-                               as_thread: bool = False) -> BeatmapUserScores | RequestThread:
+                                beatmap_id: int,
+                                user_id: int,
+                                mode: Ruleset | None = None,
+                                as_thread: bool = False) -> BeatmapUserScores | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-scores
         self.token.has_scope("public", raise_exception=True)
 
@@ -238,7 +238,7 @@ class ApiV2:
 
     def get_beatmap_scores(self,
                            beatmap_id: int,
-                           mode: GameMode | None = None,
+                           mode: Ruleset | None = None,
                            mods: list[Mod] | None = None,
                            scope: ScoreScope = "global",
                            as_thread: bool = False) -> BeatmapScores | RequestThread:
@@ -285,7 +285,7 @@ class ApiV2:
 
     def get_beatmap(self,
                      beatmap_id: int,
-                     as_thread: bool = False) -> Beatmap | RequestThread:
+                     as_thread: bool = False) -> BeatmapExtended | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-beatmap
         self.token.has_scope("public", raise_exception=True)
 
@@ -293,7 +293,7 @@ class ApiV2:
             "method": "GET",
             "url": f"/beatmaps/{beatmap_id}",
             "params": {},
-            "validate_with": Beatmap,
+            "validate_with": BeatmapExtended,
             "args": {"beatmap_id": beatmap_id}
         }
 
@@ -305,7 +305,7 @@ class ApiV2:
     def get_beatmap_attributes(self,
                                beatmap_id: int,
                                mods: list[Mod] | None = None,
-                               ruleset: GameMode | None = None,
+                               ruleset: Ruleset | None = None,
                                ruleset_id: int | None = None,
                                as_thread: bool = False) -> BeatmapAttributes | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-attributes
@@ -330,7 +330,7 @@ class ApiV2:
             return self._request(**kwargs)
 
     def get_score(self,
-                  mode: GameMode,
+                  mode: Ruleset,
                   score_id: int,
                   as_thread: bool = False) -> Score | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-apiv2scoresmodescore
@@ -349,15 +349,15 @@ class ApiV2:
             return self._request(**kwargs)
 
     def get_own_data(self,
-                     mode: GameMode | None = None,
-                     as_thread: bool = False) -> User | RequestThread:
+                     mode: Ruleset | None = None,
+                     as_thread: bool = False) -> UserExtended | RequestThread:
         # https://osu.ppy.sh/docs/index.html#get-own-data
         self.token.has_scope("identify", raise_exception=True)
 
         kwargs = {
             "method": "GET",
             "url": f"/me/{mode if mode else ''}",
-            "validate_with": User,
+            "validate_with": UserExtended,
             "args": {"mode": mode}
         }
 

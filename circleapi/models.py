@@ -8,8 +8,8 @@ import msgspec
 # https://osu.ppy.sh/docs/index.html#scopes
 ApiScope = Literal["chat.write", "delegate", "forum.write", "friends.read", "identify", "public"]
 
-# https://osu.ppy.sh/docs/index.html#gamemode
-GameMode = Literal["fruits", "mania", "osu", "taiko"]
+# https://osu.ppy.sh/docs/index.html#ruleset
+Ruleset = Literal["fruits", "mania", "osu", "taiko"]
 RankStatusString = Literal["graveyard", "wip", "pending", "ranked", "approved", "qualified", "loved"]
 Mod = Literal["HD", "DT", "HR", "FL", "NF", "NC", "SD", "SO", "PF", "EZ", "HT", "TD"]
 Rank = Literal["F", "D", "C", "B", "A", "S", "X", "SH", "XH"]
@@ -40,14 +40,25 @@ class RankStatusInt(IntEnum):
     loved = 4
 
 
-class GameModeInt(IntEnum):
+class RulesetInt(IntEnum):
     OSU = 0
     TAIKO = 1
     FRUITS = 2
     MANIA = 3
 
 
-class Covers(msgspec.Struct, rename=sanitize_name):
+class BaseStruct(msgspec.Struct):
+    def to_dict(self) -> dict:
+        def _recursive_to_dict(data: msgspec.Struct) -> dict:
+            new_dict = msgspec.structs.asdict(data)
+            for key in new_dict:
+                if isinstance(new_dict[key], msgspec.Struct):
+                    new_dict[key] = _recursive_to_dict(new_dict[key])
+            return new_dict
+        return _recursive_to_dict(self)
+
+
+class Covers(BaseStruct, rename=sanitize_name):
     cover: str
     cover_2x: str
     card: str
@@ -58,46 +69,46 @@ class Covers(msgspec.Struct, rename=sanitize_name):
     slimcover_2x: str
 
 
-class Availability(msgspec.Struct):
+class Availability(BaseStruct):
     download_disabled: bool
     more_information: str | None = None
 
 
-class Nominations(msgspec.Struct):
+class Nominations(BaseStruct):
     current: int
     required: int
 
 
-class Hype(msgspec.Struct):
+class Hype(BaseStruct):
     current: int
     required: int
 
 
-class Failtimes(msgspec.Struct):
+class Failtimes(BaseStruct):
     exit: list[int] | None = None
     fail: list[int] | None = None
 
 
-class BeatmapCompact(msgspec.Struct):
+class Beatmap(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#beatmapcompact
     # Required
     beatmapset_id: int
     difficulty_rating: float
     id: int
-    mode: GameMode
+    mode: Ruleset
     status: RankStatus
     total_length: int
     user_id: int
     version: str
 
     # Optional
-    beatmapset: BeatmapsetCompact | None = None
+    beatmapset: Beatmapset | None = None
     max_combo: int | None = None
     checksum: str | None = None
     failtimes: Failtimes | None = None
 
 
-class Beatmap(BeatmapCompact, kw_only=True):
+class BeatmapExtended(Beatmap, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmap
     # Required
     accuracy: float
@@ -111,24 +122,24 @@ class Beatmap(BeatmapCompact, kw_only=True):
     hit_length: int
     is_scoreable: bool
     last_updated: datetime
-    mode_int: GameModeInt
+    mode_int: RulesetInt
     passcount: int
     playcount: int
     ranked: RankStatusInt
     url: str
 
     # Optional
-    beatmapset: Beatmapset | None = None
+    beatmapset: BeatmapsetExtended | None = None
     deleted_at: datetime | None = None
     bpm: float | None = None
 
 
-class Beatmaps(msgspec.Struct):
+class Beatmaps(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#get-beatmaps
-    beatmaps: list[Beatmap]
+    beatmaps: list[BeatmapExtended]
 
 
-class BeatmapsetCompact(msgspec.Struct):
+class Beatmapset(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#beatmapsetcompact
     # Required
     artist: str
@@ -149,7 +160,7 @@ class BeatmapsetCompact(msgspec.Struct):
 
     # Optional
     offset: int | None
-    beatmaps: list[Beatmap] | None = None
+    beatmaps: list[BeatmapExtended] | None = None
     #converts: None  # TODO
     #current_user_attributes: None  # TODO
     #description: None  # TODO
@@ -166,7 +177,7 @@ class BeatmapsetCompact(msgspec.Struct):
     #user: None  # TODO
 
 
-class Beatmapset(BeatmapsetCompact, kw_only=True):
+class BeatmapsetExtended(Beatmapset, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     # Required
     availability: Availability
@@ -187,7 +198,7 @@ class Beatmapset(BeatmapsetCompact, kw_only=True):
     ranked_date: datetime | None = None
 
 
-class StatisticsOsu(msgspec.Struct):
+class StatisticsOsu(BaseStruct):
     count_50: int
     count_100: int
     count_300: int
@@ -196,18 +207,18 @@ class StatisticsOsu(msgspec.Struct):
     count_miss: int
 
 
-class Country(msgspec.Struct):
+class Country(BaseStruct):
     code: str
     name: str
 
 
-class Cover(msgspec.Struct):
+class Cover(BaseStruct):
     url: str
     custom_url: str | None = None
     id: int | None = None
 
 
-class UserAccountHistory(msgspec.Struct):
+class UserAccountHistory(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#usercompact-useraccounthistory
     id: int
     length: int
@@ -217,20 +228,20 @@ class UserAccountHistory(msgspec.Struct):
     description: str | None = None
 
 
-class ProfileBanner(msgspec.Struct):
+class ProfileBanner(BaseStruct):
     id: int
     tournament_id: int
     image: str
 
 
-class UserBadge(msgspec.Struct):
+class UserBadge(BaseStruct):
     awarded_at: datetime
     description: str
     image_url: str
     url: str
 
 
-class UserGroup(msgspec.Struct):
+class UserGroup(BaseStruct):
     has_listing: bool
     has_playmodes: bool
     id: int
@@ -239,35 +250,35 @@ class UserGroup(msgspec.Struct):
     name: str
     short_name: str
     colour: str | None = None
-    playmodes: list[GameMode] | None = None
+    playmodes: list[Ruleset] | None = None
 
 
-class UserMonthlyPlaycount(msgspec.Struct):
+class UserMonthlyPlaycount(BaseStruct):
     count: int
     start_date: str
 
 
-class UserPage(msgspec.Struct):
+class UserPage(BaseStruct):
     html: str
     raw: str
 
 
-class RankHighest(msgspec.Struct):
+class RankHighest(BaseStruct):
     rank: int
     updated_at: datetime
 
 
-class RankHistory(msgspec.Struct):
-    mode: GameMode
+class RankHistory(BaseStruct):
+    mode: Ruleset
     data: list[int]
 
 
-class UserLevel(msgspec.Struct):
+class UserLevel(BaseStruct):
     current: int
     progress: int
 
 
-class UserGradeCounts(msgspec.Struct):
+class UserGradeCounts(BaseStruct):
     a: int
     s: int
     sh: int
@@ -275,7 +286,7 @@ class UserGradeCounts(msgspec.Struct):
     ssh: int
 
 
-class UserStatistics(msgspec.Struct):
+class UserStatistics(BaseStruct):
     count_300: int
     count_100: int
     count_50: int
@@ -296,24 +307,24 @@ class UserStatistics(msgspec.Struct):
     country_rank: int | None = None
 
 
-class UserStatisticsRulesets(msgspec.Struct):
+class UserStatisticsRulesets(BaseStruct):
     osu: UserStatistics
     taiko: UserStatistics
     fruits: UserStatistics
     mania: UserStatistics
 
 
-class UserAchievement(msgspec.Struct):
+class UserAchievement(BaseStruct):
     achieved_at: datetime
     achievement_id: int
 
 
-class UserReplayWatchcount(msgspec.Struct):
+class UserReplayWatchcount(BaseStruct):
     start_date: str
     count: int
 
 
-class UserCompact(msgspec.Struct):
+class User(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#usercompact
     # Required
     avatar_url: str
@@ -363,18 +374,18 @@ class UserCompact(msgspec.Struct):
     user_achievements: list[UserAchievement] | None = None
 
 
-class UserKudosu(msgspec.Struct):
+class UserKudosu(BaseStruct):
     available: int
     total: int
 
 
-class User(UserCompact, kw_only=True):
+class UserExtended(User, kw_only=True):
     has_supported: bool
     join_date: datetime
     kudosu: UserKudosu
     max_blocks: int
     max_friends: int
-    playmode: GameMode
+    playmode: Ruleset
     playstyle: list[PlayStyle]
     post_count: int
     profile_order: list[ProfilePage]
@@ -388,7 +399,7 @@ class User(UserCompact, kw_only=True):
     website: str | None = None
 
 
-class Score(msgspec.Struct):
+class Score(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#score
     # Required
     id: int
@@ -403,35 +414,35 @@ class Score(msgspec.Struct):
     passed: bool
     rank: Rank
     created_at: datetime
-    mode: GameMode
-    mode_int: GameModeInt
+    mode: Ruleset
+    mode_int: RulesetInt
     replay: bool
 
     # Optional
     pp: float | None = None
-    user: UserCompact | None = None
-    beatmap: Beatmap | None = None
+    user: User | None = None
+    beatmap: BeatmapExtended | None = None
     rank_global: int | None = None
 
 
-class BeatmapUserScore(msgspec.Struct):
+class BeatmapUserScore(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#beatmapuserscore
     position: int
     score: Score
 
 
-class BeatmapUserScores(msgspec.Struct):
+class BeatmapUserScores(BaseStruct):
     scores: list[Score]
 
 
-class BeatmapScores(msgspec.Struct):
+class BeatmapScores(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     scores: list[Score]
     user_score: BeatmapUserScore | None = None
     args: dict | None = None
 
 
-class BeatmapDifficultyAttributes(msgspec.Struct):
+class BeatmapDifficultyAttributes(BaseStruct):
     # https://osu.ppy.sh/docs/index.html#beatmapdifficultyattributes
     # Required
     max_combo: int
@@ -458,11 +469,11 @@ class BeatmapDifficultyAttributes(msgspec.Struct):
     score_multiplier: float | None = None
 
 
-class BeatmapAttributes(msgspec.Struct):
+class BeatmapAttributes(BaseStruct):
     attributes: BeatmapDifficultyAttributes
 
 
-class TokenPayload(msgspec.Struct):
+class TokenPayload(BaseStruct):
     aud: int
     jti: str
     iat: float
