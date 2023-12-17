@@ -90,7 +90,7 @@ class Failtimes(BaseStruct):
 
 
 class Beatmap(BaseStruct):
-    # https://osu.ppy.sh/docs/index.html#beatmapcompact
+    # https://osu.ppy.sh/docs/index.html#beatmap
     # Required
     beatmapset_id: int
     difficulty_rating: float
@@ -109,7 +109,7 @@ class Beatmap(BaseStruct):
 
 
 class BeatmapExtended(Beatmap, kw_only=True):
-    # https://osu.ppy.sh/docs/index.html#beatmap
+    # https://osu.ppy.sh/docs/index.html#beatmapextended
     # Required
     accuracy: float
     ar: float
@@ -140,7 +140,7 @@ class Beatmaps(BaseStruct):
 
 
 class Beatmapset(BaseStruct):
-    # https://osu.ppy.sh/docs/index.html#beatmapsetcompact
+    # https://osu.ppy.sh/docs/index.html#beatmapset
     # Required
     artist: str
     artist_unicode: str
@@ -153,6 +153,7 @@ class Beatmapset(BaseStruct):
     preview_url: str
     source: str
     status: RankStatusString
+    spotlight: bool
     title: str
     title_unicode: str
     user_id: int
@@ -169,16 +170,17 @@ class Beatmapset(BaseStruct):
     #genre: None  # TODO
     has_favourited: bool | None = None
     #language: None  # TODO
-    nominations: Nominations | None = None
+    nominations_summary: Nominations | None = None
     pack_tags: list[str] | None = None
     ratings: list[int] | None = None
     #recent_favourites: None  # TODO
     #related_users: None  # TODO
     #user: None  # TODO
+    track_id: int | None = None
 
 
 class BeatmapsetExtended(Beatmapset, kw_only=True):
-    # https://osu.ppy.sh/docs/index.html#beatmapset
+    # https://osu.ppy.sh/docs/index.html#beatmapsetextended
     # Required
     availability: Availability
     bpm: float
@@ -196,6 +198,10 @@ class BeatmapsetExtended(Beatmapset, kw_only=True):
     legacy_thread_url: str | None = None
     submitted_date: datetime | None = None
     ranked_date: datetime | None = None
+    deleted_at: datetime | None = None
+
+    # Derpecated
+    discussion_enabled: bool | None = None
 
 
 class StatisticsOsu(BaseStruct):
