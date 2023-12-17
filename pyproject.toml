@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circleapi"
+version = "2023.12.17"
+authors = [
+  { name="miinorii" },
+]
+dependencies = [
+    "httpx[http2]>=0.25.2",
+    "msgspec>=0.18.4",
+    "python-dotenv>=1.0.0"
+]
+keywords = ["osu!", "apiv2", "wrapper"]
+description = "Unoffical osu! apiv2 python wrapper"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/miinorii/circleapi"
+Issues = "https://github.com/miinorii/circleapi/issues"
