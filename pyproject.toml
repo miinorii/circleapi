@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "httpx[http2]>=0.25.2",
-    "msgspec>=0.18.4",
+    "msgspec>=0.18.5",
     "python-dotenv>=1.0.0"
 ]
 keywords = ["osu!", "apiv2", "wrapper"]
