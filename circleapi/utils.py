@@ -5,6 +5,7 @@ import base64
 import json
 import threading
 import time
+import asyncio
 
 
 class InvalidApiScope(Exception):
@@ -64,6 +65,45 @@ class RateLimit:
         Return True if empty
         """
         with self._lock:
+            current_ts = int(time.time())
+            time_passed = current_ts - self.last_req_ts
+            self.last_req_ts = current_ts
+            self.bucket = self.bucket + time_passed * self.max_req_per_sec
+
+            if self.bucket > self.bucket_limit:
+                self.bucket = self.bucket_limit
+
+            if self.bucket < 1:
+                logger.warning("Rate limit exceeded")
+                return True
+            else:
+                self.bucket = self.bucket - 1
+                return False
+
+
+class AsyncRateLimit:
+    max_req_per_sec: float
+    bucket_limit: float
+    bucket: float
+    last_req_ts: int
+
+    def __init__(self, req_per_minute):
+        self._lock = asyncio.Lock()
+        self.set_rate_limit(req_per_minute)
+
+    def set_rate_limit(self, req_per_minute: int):
+        self.max_req_per_sec = req_per_minute / 60
+        self.bucket_limit = 1 if self.max_req_per_sec < 1 else self.max_req_per_sec
+        self.bucket = self.bucket_limit
+        self.last_req_ts = int(time.time())
+
+    async def is_exceeded(self):
+        """
+        Token bucket algorithm
+
+        Return True if empty
+        """
+        async with self._lock:
             current_ts = int(time.time())
             time_passed = current_ts - self.last_req_ts
             self.last_req_ts = current_ts

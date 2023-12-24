@@ -62,7 +62,7 @@ class ApiV2:
             params: dict | str | None = None,
             json_data: dict | None = None,
             args: dict | None = None,
-            as_dict: bool=False,
+            as_dict: bool = False,
             validate_with=None):
 
         # Rate limit check
@@ -302,6 +302,7 @@ class ApiV2:
         }
 
         return self._request(**kwargs)
+
 
 class ExternalApi:
     @staticmethod
