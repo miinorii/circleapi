@@ -57,6 +57,10 @@ class BaseStruct(msgspec.Struct):
             for key in new_dict:
                 if isinstance(new_dict[key], msgspec.Struct):
                     new_dict[key] = _recursive_to_dict(new_dict[key])
+                elif isinstance(new_dict[key], list):
+                    for index, value in enumerate(new_dict[key]):
+                        if isinstance(value, msgspec.Struct):
+                            new_dict[key][index] = _recursive_to_dict(value)
             return new_dict
         return _recursive_to_dict(self)
 
