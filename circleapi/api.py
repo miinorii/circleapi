@@ -6,79 +6,12 @@ from .models import (
     Score, UserExtended
 )
 from .token import GuestToken, UserToken
-from copy import deepcopy
+from .utils import RateLimit
 import msgspec
 import time
 import threading
 import httpx
 import random
-
-
-class RequestThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.result = None
-        self.args = None
-
-    def run(self):
-        """
-        Taken from python threading.Thread implementation:
-
-            Method representing the thread's activity.
-
-            You may override this method in a subclass. The standard run() method
-            invokes the callable object passed to the object's constructor as the
-            target argument, if any, with sequential and keyword arguments taken
-            from the args and kwargs arguments, respectively.
-
-        """
-        try:
-            if self._target is not None:
-                self.args = deepcopy(self._kwargs.get("args") if self._kwargs.get("args") else {})
-                self.result = self._target(*self._args, **self._kwargs)
-        finally:
-            # Avoid a refcycle if the thread is running a function with
-            # an argument that has a member that points to the thread.
-            del self._target, self._args, self._kwargs
-
-
-class RateLimit:
-    max_req_per_sec: float
-    bucket_limit: float
-    bucket: float
-    last_req_ts: int
-
-    def __init__(self, req_per_minute):
-        self._lock = threading.Lock()
-        self.set_rate_limit(req_per_minute)
-
-    def set_rate_limit(self, req_per_minute: int):
-        self.max_req_per_sec = req_per_minute / 60
-        self.bucket_limit = 1 if self.max_req_per_sec < 1 else self.max_req_per_sec
-        self.bucket = self.bucket_limit
-        self.last_req_ts = int(time.time())
-
-    def is_exceeded(self):
-        """
-        Token bucket algorithm
-
-        Return True if empty
-        """
-        with self._lock:
-            current_ts = int(time.time())
-            time_passed = current_ts - self.last_req_ts
-            self.last_req_ts = current_ts
-            self.bucket = self.bucket + time_passed * self.max_req_per_sec
-
-            if self.bucket > self.bucket_limit:
-                self.bucket = self.bucket_limit
-
-            if self.bucket < 1:
-                logger.warning("Rate limit exceeded")
-                return True
-            else:
-                self.bucket = self.bucket - 1
-                return False
 
 
 class ApiV2:
@@ -88,6 +21,8 @@ class ApiV2:
         self.rate_limit = RateLimit(1000)
         self._global_client = False
         self._lock = threading.Lock()
+        self._decoder = msgspec.json.Decoder()
+        self._encoder = msgspec.json.Encoder()
 
     def _create_client(self) -> httpx.Client:
         return httpx.Client(
@@ -127,11 +62,16 @@ class ApiV2:
             params: dict | str | None = None,
             json_data: dict | None = None,
             args: dict | None = None,
+            as_dict: bool=False,
             validate_with=None):
 
         # Rate limit check
+        # Exponential backoff with a bit of randomness
+        rate_limit_hit = 0
         while self.rate_limit.is_exceeded():
-            time.sleep(random.randint(1, 4))
+            sleep_time = min(2 ** rate_limit_hit, 32) + random.randint(0, 1000) / 1000
+            time.sleep(sleep_time)
+            rate_limit_hit += 1
 
         # Token validity check
         self.token.check_token()
@@ -151,17 +91,32 @@ class ApiV2:
 
         req.raise_for_status()
         logger.info(f"[  \033[32mOK\033[0m  ] {url} {params=} {json_data=}")
-        data = msgspec.json.decode(req.content, type=validate_with, strict=False)
 
-        if hasattr(validate_with, "args"):
-            data.args = args
-        return data
+        # Dirty workaround to add some important values that are missing from api responses
+        data: dict = self._decoder.decode(req.content)
+        if args:
+            data.update(args)
+            if validate_with is BeatmapScores:
+                for score in data["scores"]:
+                    score.update(args)
+                if data["user_score"]:
+                    data["user_score"]["score"].update(args)
+            elif validate_with is BeatmapUserScore:
+                data["score"].update(args)
+            elif validate_with is BeatmapUserScores:
+                for score in data["scores"]:
+                    score.update(args)
+
+        if as_dict:
+            return data
+        else:
+            return msgspec.json.decode(self._encoder.encode(data), type=validate_with, strict=False)
 
     def beatmap_lookup(self,
                        checksum: str | None = None,
                        filename: str | None = None,
                        beatmap_id: int | None = None,
-                       as_thread: bool = False) -> BeatmapExtended | RequestThread:
+                       as_dict: bool = False) -> BeatmapExtended:
         # https://osu.ppy.sh/docs/index.html#lookup-beatmap
         self.token.has_scope("public", raise_exception=True)
 
@@ -178,20 +133,18 @@ class ApiV2:
             "url": f"/beatmaps/lookup",
             "params": params,
             "validate_with": BeatmapExtended,
-            "args": params
+            "args": params,
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_user_beatmap_score(self,
                                beatmap_id: int,
                                user_id: int,
                                mode: Ruleset | None = None,
                                mods: list[Mod] | None = None,
-                               as_thread: bool = False) -> BeatmapUserScore | RequestThread:
+                               as_dict: bool = False) -> BeatmapUserScore:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-score
         self.token.has_scope("public", raise_exception=True)
 
@@ -204,19 +157,17 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}",
             "params": params,
             "validate_with": BeatmapUserScore,
-            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
+            "args": {"args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}, "beatmap_id": beatmap_id},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_user_beatmap_scores(self,
                                 beatmap_id: int,
                                 user_id: int,
                                 mode: Ruleset | None = None,
-                                as_thread: bool = False) -> BeatmapUserScores | RequestThread:
+                                as_dict: bool = False) -> BeatmapUserScores:
         # https://osu.ppy.sh/docs/index.html#get-a-user-beatmap-scores
         self.token.has_scope("public", raise_exception=True)
 
@@ -228,20 +179,18 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores/users/{user_id}/all",
             "params": params,
             "validate_with": BeatmapUserScores,
-            "args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}
+            "args": {"args": {"beatmap_id": beatmap_id, "user_id": user_id, **params}, "beatmap_id": beatmap_id},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_beatmap_scores(self,
                            beatmap_id: int,
                            mode: Ruleset | None = None,
                            mods: list[Mod] | None = None,
                            scope: ScoreScope = "global",
-                           as_thread: bool = False) -> BeatmapScores | RequestThread:
+                           as_dict: bool = False) -> BeatmapScores:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-scores
         self.token.has_scope("public", raise_exception=True)
 
@@ -255,17 +204,15 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/scores",
             "params": params,
             "validate_with": BeatmapScores,
-            "args": {"beatmap_id": beatmap_id, **params}
+            "args": {"args": {"beatmap_id": beatmap_id, **params}, "beatmap_id": beatmap_id, "scope": scope},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_beatmaps(self,
                      ids: list[int],
-                     as_thread: bool = False) -> Beatmaps | RequestThread:
+                     as_dict: bool = False) -> Beatmaps:
         # https://osu.ppy.sh/docs/index.html#get-beatmaps
         self.token.has_scope("public", raise_exception=True)
 
@@ -275,17 +222,15 @@ class ApiV2:
             "url": f"/beatmaps",
             "params": params,
             "validate_with": Beatmaps,
-            "args": {"ids": ids}
+            "args": {"args": {"ids": ids}},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_beatmap(self,
                      beatmap_id: int,
-                     as_thread: bool = False) -> BeatmapExtended | RequestThread:
+                     as_dict: bool = False) -> BeatmapExtended:
         # https://osu.ppy.sh/docs/index.html#get-beatmap
         self.token.has_scope("public", raise_exception=True)
 
@@ -294,20 +239,18 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}",
             "params": {},
             "validate_with": BeatmapExtended,
-            "args": {"beatmap_id": beatmap_id}
+            "args": {"args": {"beatmap_id": beatmap_id}},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_beatmap_attributes(self,
                                beatmap_id: int,
                                mods: list[Mod] | None = None,
                                ruleset: Ruleset | None = None,
                                ruleset_id: int | None = None,
-                               as_thread: bool = False) -> BeatmapAttributes | RequestThread:
+                               as_dict: bool = False) -> BeatmapAttributes:
         # https://osu.ppy.sh/docs/index.html#get-beatmap-attributes
         self.token.has_scope("public", raise_exception=True)
 
@@ -321,18 +264,16 @@ class ApiV2:
             "url": f"/beatmaps/{beatmap_id}/attributes",
             "json_data": params,
             "validate_with": BeatmapAttributes,
-            "args": {"beatmap_id": beatmap_id, **params}
+            "args": {"args": {"beatmap_id": beatmap_id, **params}, "beatmap_id": beatmap_id},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_score(self,
                   mode: Ruleset,
                   score_id: int,
-                  as_thread: bool = False) -> Score | RequestThread:
+                  as_dict: bool = False) -> Score:
         # https://osu.ppy.sh/docs/index.html#get-apiv2scoresmodescore
         self.token.has_scope("public", raise_exception=True)
 
@@ -340,17 +281,15 @@ class ApiV2:
             "method": "GET",
             "url": f"/scores/{mode}/{score_id}",
             "validate_with": Score,
-            "args": {"mode": mode, "score_id": score_id}
+            "args": {"args": {"mode": mode, "score_id": score_id}, "id": score_id},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
     def get_own_data(self,
                      mode: Ruleset | None = None,
-                     as_thread: bool = False) -> UserExtended | RequestThread:
+                     as_dict: bool = False) -> UserExtended:
         # https://osu.ppy.sh/docs/index.html#get-own-data
         self.token.has_scope("identify", raise_exception=True)
 
@@ -358,13 +297,11 @@ class ApiV2:
             "method": "GET",
             "url": f"/me/{mode if mode else ''}",
             "validate_with": UserExtended,
-            "args": {"mode": mode}
+            "args": {"args": {"mode": mode}},
+            "as_dict": as_dict
         }
 
-        if as_thread:
-            return RequestThread(target=self._request, kwargs=kwargs)
-        else:
-            return self._request(**kwargs)
+        return self._request(**kwargs)
 
 class ExternalApi:
     @staticmethod

@@ -48,6 +48,9 @@ class RulesetInt(IntEnum):
 
 
 class BaseStruct(msgspec.Struct):
+    def __hash__(self):
+        return hash(self.__repr__())
+
     def to_dict(self) -> dict:
         def _recursive_to_dict(data: msgspec.Struct) -> dict:
             new_dict = msgspec.structs.asdict(data)
@@ -58,7 +61,7 @@ class BaseStruct(msgspec.Struct):
         return _recursive_to_dict(self)
 
 
-class Covers(BaseStruct, rename=sanitize_name):
+class Covers(BaseStruct, kw_only=True, rename=sanitize_name):
     cover: str
     cover_2x: str
     card: str
@@ -69,27 +72,27 @@ class Covers(BaseStruct, rename=sanitize_name):
     slimcover_2x: str
 
 
-class Availability(BaseStruct):
+class Availability(BaseStruct, kw_only=True):
     download_disabled: bool
     more_information: str | None = None
 
 
-class Nominations(BaseStruct):
+class Nominations(BaseStruct, kw_only=True):
     current: int
     required: int
 
 
-class Hype(BaseStruct):
+class Hype(BaseStruct, kw_only=True):
     current: int
     required: int
 
 
-class Failtimes(BaseStruct):
+class Failtimes(BaseStruct, kw_only=True):
     exit: list[int] | None = None
     fail: list[int] | None = None
 
 
-class Beatmap(BaseStruct):
+class Beatmap(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmap
     # Required
     beatmapset_id: int
@@ -134,12 +137,12 @@ class BeatmapExtended(Beatmap, kw_only=True):
     bpm: float | None = None
 
 
-class Beatmaps(BaseStruct):
+class Beatmaps(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#get-beatmaps
     beatmaps: list[BeatmapExtended]
 
 
-class Beatmapset(BaseStruct):
+class Beatmapset(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     # Required
     artist: str
@@ -204,7 +207,7 @@ class BeatmapsetExtended(Beatmapset, kw_only=True):
     discussion_enabled: bool | None = None
 
 
-class StatisticsOsu(BaseStruct):
+class StatisticsOsu(BaseStruct, kw_only=True):
     count_50: int
     count_100: int
     count_300: int
@@ -213,18 +216,18 @@ class StatisticsOsu(BaseStruct):
     count_miss: int
 
 
-class Country(BaseStruct):
+class Country(BaseStruct, kw_only=True):
     code: str
     name: str
 
 
-class Cover(BaseStruct):
+class Cover(BaseStruct, kw_only=True):
     url: str
     custom_url: str | None = None
     id: int | None = None
 
 
-class UserAccountHistory(BaseStruct):
+class UserAccountHistory(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#usercompact-useraccounthistory
     id: int
     length: int
@@ -234,20 +237,20 @@ class UserAccountHistory(BaseStruct):
     description: str | None = None
 
 
-class ProfileBanner(BaseStruct):
+class ProfileBanner(BaseStruct, kw_only=True):
     id: int
     tournament_id: int
     image: str
 
 
-class UserBadge(BaseStruct):
+class UserBadge(BaseStruct, kw_only=True):
     awarded_at: datetime
     description: str
     image_url: str
     url: str
 
 
-class UserGroup(BaseStruct):
+class UserGroup(BaseStruct, kw_only=True):
     has_listing: bool
     has_playmodes: bool
     id: int
@@ -259,32 +262,32 @@ class UserGroup(BaseStruct):
     playmodes: list[Ruleset] | None = None
 
 
-class UserMonthlyPlaycount(BaseStruct):
+class UserMonthlyPlaycount(BaseStruct, kw_only=True):
     count: int
     start_date: str
 
 
-class UserPage(BaseStruct):
+class UserPage(BaseStruct, kw_only=True):
     html: str
     raw: str
 
 
-class RankHighest(BaseStruct):
+class RankHighest(BaseStruct, kw_only=True):
     rank: int
     updated_at: datetime
 
 
-class RankHistory(BaseStruct):
+class RankHistory(BaseStruct, kw_only=True):
     mode: Ruleset
     data: list[int]
 
 
-class UserLevel(BaseStruct):
+class UserLevel(BaseStruct, kw_only=True):
     current: int
     progress: int
 
 
-class UserGradeCounts(BaseStruct):
+class UserGradeCounts(BaseStruct, kw_only=True):
     a: int
     s: int
     sh: int
@@ -292,7 +295,7 @@ class UserGradeCounts(BaseStruct):
     ssh: int
 
 
-class UserStatistics(BaseStruct):
+class UserStatistics(BaseStruct, kw_only=True):
     count_300: int
     count_100: int
     count_50: int
@@ -313,24 +316,24 @@ class UserStatistics(BaseStruct):
     country_rank: int | None = None
 
 
-class UserStatisticsRulesets(BaseStruct):
+class UserStatisticsRulesets(BaseStruct, kw_only=True):
     osu: UserStatistics
     taiko: UserStatistics
     fruits: UserStatistics
     mania: UserStatistics
 
 
-class UserAchievement(BaseStruct):
+class UserAchievement(BaseStruct, kw_only=True):
     achieved_at: datetime
     achievement_id: int
 
 
-class UserReplayWatchcount(BaseStruct):
+class UserReplayWatchcount(BaseStruct, kw_only=True):
     start_date: str
     count: int
 
 
-class User(BaseStruct):
+class User(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#usercompact
     # Required
     avatar_url: str
@@ -380,7 +383,7 @@ class User(BaseStruct):
     user_achievements: list[UserAchievement] | None = None
 
 
-class UserKudosu(BaseStruct):
+class UserKudosu(BaseStruct, kw_only=True):
     available: int
     total: int
 
@@ -405,7 +408,7 @@ class UserExtended(User, kw_only=True):
     website: str | None = None
 
 
-class Score(BaseStruct):
+class Score(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#score
     # Required
     id: int
@@ -425,30 +428,32 @@ class Score(BaseStruct):
     replay: bool
 
     # Optional
+    beatmap_id: int | None = None
     pp: float | None = None
     user: User | None = None
     beatmap: BeatmapExtended | None = None
     rank_global: int | None = None
 
 
-class BeatmapUserScore(BaseStruct):
+class BeatmapUserScore(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapuserscore
     position: int
     score: Score
 
 
-class BeatmapUserScores(BaseStruct):
+class BeatmapUserScores(BaseStruct, kw_only=True):
     scores: list[Score]
 
 
-class BeatmapScores(BaseStruct):
+class BeatmapScores(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapset
     scores: list[Score]
+    scope: ScoreScope
+    beatmap_id: int
     user_score: BeatmapUserScore | None = None
-    args: dict | None = None
 
 
-class BeatmapDifficultyAttributes(BaseStruct):
+class BeatmapDifficultyAttributes(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#beatmapdifficultyattributes
     # Required
     max_combo: int
@@ -475,11 +480,12 @@ class BeatmapDifficultyAttributes(BaseStruct):
     score_multiplier: float | None = None
 
 
-class BeatmapAttributes(BaseStruct):
+class BeatmapAttributes(BaseStruct, kw_only=True):
     attributes: BeatmapDifficultyAttributes
+    beatmap_id: int
 
 
-class TokenPayload(BaseStruct):
+class TokenPayload(BaseStruct, kw_only=True):
     aud: int
     jti: str
     iat: float

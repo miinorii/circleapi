@@ -54,12 +54,12 @@ class TestApiV2Live(unittest.TestCase):
     def test_get_beatmap_scores(self):
         data = self.api.get_beatmap_scores(53, mode="osu", scope="global")
         self.assertIsInstance(data, BeatmapScores)
-        self.assertEqual(53, data.args["beatmap_id"])
-        self.assertEqual("global", data.args["type"])
+        self.assertEqual(53, data.beatmap_id)
+        self.assertEqual("global", data.scope)
         data = self.api.get_beatmap_scores(53, mode="osu", scope="country")
         self.assertIsInstance(data, BeatmapScores)
-        self.assertEqual(53, data.args["beatmap_id"])
-        self.assertEqual("country", data.args["type"])
+        self.assertEqual(53, data.beatmap_id)
+        self.assertEqual("country", data.scope)
 
     def test_get_beatmaps(self):
         data = self.api.get_beatmaps([53, 55])
