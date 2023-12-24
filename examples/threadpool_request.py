@@ -22,7 +22,7 @@ req_args = [{"beatmap_id": 53, "ruleset": "osu"}, {"beatmap_id": 55, "ruleset": 
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
     future_to_args = {executor.submit(api.get_beatmap_attributes, **args): args for args in req_args}
     for future in concurrent.futures.as_completed(future_to_args):
-        args = future_to_args[future]
+        args = future_to_args.pop(future)
         try:
             data = future.result()
         except Exception as exc:
