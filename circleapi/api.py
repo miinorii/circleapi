@@ -2,7 +2,7 @@ from .logger import logger
 from .models import (
     BeatmapScores, Ruleset, ScoreScope,
     BeatmapExtended, Mod, BeatmapUserScore,
-    BeatmapUserScores, Beatmaps, BeatmapAttributes,
+    BeatmapUserScores, BeatmapsExtended, BeatmapAttributes,
     Score, UserExtended
 )
 from .token import GuestToken, UserToken
@@ -212,7 +212,7 @@ class ApiV2:
 
     def get_beatmaps(self,
                      ids: list[int],
-                     as_dict: bool = False) -> Beatmaps:
+                     as_dict: bool = False) -> BeatmapsExtended:
         # https://osu.ppy.sh/docs/index.html#get-beatmaps
         self.token.has_scope("public", raise_exception=True)
 
@@ -221,7 +221,7 @@ class ApiV2:
             "method": "GET",
             "url": f"/beatmaps",
             "params": params,
-            "validate_with": Beatmaps,
+            "validate_with": BeatmapsExtended,
             "args": {"args": {"ids": ids}},
             "as_dict": as_dict
         }

@@ -3,7 +3,7 @@ import os
 from circleapi import (
     AsyncApiV2, BeatmapExtended, AsyncUserToken,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
-    Beatmaps, BeatmapAttributes, setup_queue_logging,
+    BeatmapsExtended, BeatmapAttributes, setup_queue_logging,
     Score, AsyncExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
@@ -58,7 +58,7 @@ class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_beatmaps(self):
         data = await self.api.get_beatmaps([53, 55])
-        self.assertIsInstance(data, Beatmaps)
+        self.assertIsInstance(data, BeatmapsExtended)
         self.assertEqual(2, len(data.beatmaps))
 
     async def test_get_beatmap(self):

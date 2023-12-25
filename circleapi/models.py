@@ -141,7 +141,7 @@ class BeatmapExtended(Beatmap, kw_only=True):
     bpm: float | None = None
 
 
-class Beatmaps(BaseStruct, kw_only=True):
+class BeatmapsExtended(BaseStruct, kw_only=True):
     # https://osu.ppy.sh/docs/index.html#get-beatmaps
     beatmaps: list[BeatmapExtended]
 

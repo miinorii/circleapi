@@ -6,7 +6,7 @@ from .utils import RateLimit, RequestThread, AsyncRateLimit
 from .async_api import AsyncApiV2, AsyncExternalApi
 from .models import (
     BeatmapExtended, BeatmapUserScore, BeatmapUserScores,
-    BeatmapScores, Beatmaps, BeatmapAttributes,
+    BeatmapScores, BeatmapsExtended, BeatmapAttributes,
     Score, BeatmapsetExtended, User, ScoreScope, Ruleset, UserExtended,
     BaseStruct
 )

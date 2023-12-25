@@ -4,7 +4,7 @@ import warnings
 from circleapi import (
     UserToken, ApiV2, BeatmapExtended,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
-    Beatmaps, BeatmapAttributes, setup_queue_logging,
+    BeatmapsExtended, BeatmapAttributes, setup_queue_logging,
     Score, ExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
@@ -63,7 +63,7 @@ class TestApiV2Live(unittest.TestCase):
 
     def test_get_beatmaps(self):
         data = self.api.get_beatmaps([53, 55])
-        self.assertIsInstance(data, Beatmaps)
+        self.assertIsInstance(data, BeatmapsExtended)
         self.assertEqual(2, len(data.beatmaps))
 
     def test_get_beatmap(self):
