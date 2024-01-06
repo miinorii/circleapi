@@ -99,7 +99,7 @@ class ApiV2:
             if validate_with is BeatmapScores:
                 for score in data["scores"]:
                     score.update(args)
-                if data["user_score"]:
+                if "user_score" in data:
                     data["user_score"]["score"].update(args)
             elif validate_with is BeatmapUserScore:
                 data["score"].update(args)
