@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "circleapi"
-version = "2024.6.1.1"
+version = "2024.1.6.1"
 authors = [
   { name="miinorii" },
 ]
