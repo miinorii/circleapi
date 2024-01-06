@@ -1,4 +1,4 @@
-from circleapi import AsyncGuestToken, AsyncApiV2, setup_queue_logging
+from circleapi import AsyncGuestToken, AsyncApiV2, start_logging
 import asyncio
 import os
 
@@ -34,11 +34,6 @@ if __name__ == "__main__":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     # Start logging requests
-    log = setup_queue_logging(to_console=True)
-    log.start()
-
-    # Run main
-    asyncio.run(main())
-
-    log.stop()
-
+    with start_logging(to_console=True):
+        # Run main
+        asyncio.run(main())

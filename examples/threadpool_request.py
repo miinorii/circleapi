@@ -1,14 +1,10 @@
 import concurrent.futures
-from circleapi import GuestToken, ApiV2, setup_queue_logging
+from circleapi import GuestToken, ApiV2, start_logging
 
 
 CLIENT_ID = 12345
 CLIENT_SECRET = "secret"
 MAX_THREAD_COUNT = 4
-
-# Start logging requests
-log = setup_queue_logging(to_console=True)
-log.start()
 
 # Initialize objects
 token = GuestToken(
@@ -19,7 +15,7 @@ token = GuestToken(
 api = ApiV2(token)
 
 req_args = [{"beatmap_id": 53, "ruleset": "osu"}, {"beatmap_id": 55, "ruleset": "osu"}]
-with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor, start_logging(to_console=True):
     future_to_args = {executor.submit(api.get_beatmap_attributes, **args): args for args in req_args}
     for future in concurrent.futures.as_completed(future_to_args):
         args = future_to_args.pop(future)
@@ -30,4 +26,3 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as exec
         else:
             print(data)
 
-log.stop()

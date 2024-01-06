@@ -3,7 +3,7 @@ import os
 from circleapi import (
     AsyncApiV2, BeatmapExtended, AsyncUserToken,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
-    BeatmapsExtended, BeatmapAttributes, setup_queue_logging,
+    BeatmapsExtended, BeatmapAttributes, setup_logging_queue,
     Score, AsyncExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
@@ -21,7 +21,7 @@ token = AsyncUserToken(
 class TestAsyncApiV2Live(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.log = setup_queue_logging(to_console=True)
+        cls.log = setup_logging_queue(to_console=True)
         cls.log.start()
         cls.api = AsyncApiV2(token)
 

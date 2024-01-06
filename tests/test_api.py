@@ -4,7 +4,7 @@ import warnings
 from circleapi import (
     UserToken, ApiV2, BeatmapExtended,
     BeatmapUserScore, BeatmapUserScores, BeatmapScores,
-    BeatmapsExtended, BeatmapAttributes, setup_queue_logging,
+    BeatmapsExtended, BeatmapAttributes, setup_logging_queue,
     Score, ExternalApi, BeatmapsetExtended, UserExtended
 )
 from dotenv import dotenv_values
@@ -16,7 +16,7 @@ TEST_DIR = os.path.realpath(os.path.dirname(__file__))
 class TestApiV2Live(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.log = setup_queue_logging(to_console=True)
+        cls.log = setup_logging_queue(to_console=True)
         cls.log.start()
         warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
         env = dotenv_values(os.path.join(TEST_DIR, ".env"))
